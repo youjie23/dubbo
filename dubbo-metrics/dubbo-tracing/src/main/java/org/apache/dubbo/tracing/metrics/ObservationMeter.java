@@ -14,33 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.springboot.demo.servlet;
+package org.apache.dubbo.tracing.metrics;
 
-import org.apache.dubbo.common.stream.StreamObserver;
+import org.apache.dubbo.metrics.MetricsGlobalRegistry;
+import org.apache.dubbo.rpc.model.ApplicationModel;
 
-import java.util.concurrent.CompletableFuture;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.observation.ObservationRegistry;
 
-public interface GreeterService {
+public class ObservationMeter {
 
-    /**
-     * Sends a greeting
-     */
-    HelloReply sayHello(HelloRequest request);
-
-    /**
-     * Sends a greeting asynchronously
-     */
-    CompletableFuture<String> sayHelloAsync(String request);
-
-    /**
-     * Sends a greeting with server streaming
-     */
-    void sayHelloServerStream(HelloRequest request, StreamObserver<HelloReply> responseObserver);
-
-    void sayHelloServerStreamNoParameter(StreamObserver<HelloReply> responseObserver);
-
-    /**
-     * Sends greetings with bi streaming
-     */
-    StreamObserver<HelloRequest> sayHelloBiStream(StreamObserver<HelloReply> responseObserver);
+    public static void addMeterRegistry(ObservationRegistry registry, ApplicationModel applicationModel) {
+        MeterRegistry meterRegistry = MetricsGlobalRegistry.getCompositeRegistry(applicationModel);
+        registry.observationConfig()
+                .observationHandler(
+                        new io.micrometer.core.instrument.observation.DefaultMeterObservationHandler(meterRegistry));
+    }
 }
